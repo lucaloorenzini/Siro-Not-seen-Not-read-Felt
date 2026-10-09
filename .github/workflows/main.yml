@@ -1,0 +1,53 @@
+name: Pubblica il sito
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  costruisci:
+    runs-on: ubuntu-latest
+    env:
+      SITE_URL: https://${{ github.repository_owner }}.github.io
+      BASE_PATH: /${{ github.event.repository.name }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Trova la cartella del progetto
+        run: |
+          if [ -f package.json ]; then
+            echo "DIR=." >> "$GITHUB_ENV"
+          else
+            echo "DIR=$(dirname "$(find . -maxdepth 3 -name package.json -not -path '*/node_modules/*' | head -1)")" >> "$GITHUB_ENV"
+          fi
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: '**/package-lock.json'
+      - run: npm ci
+        working-directory: ${{ env.DIR }}
+      - run: npm run build
+        working-directory: ${{ env.DIR }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: ${{ env.DIR }}/dist
+
+  pubblica:
+    needs: costruisci
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
