@@ -1,0 +1,15 @@
+---
+import Base from '../layouts/Base.astro';
+import { getEntry, render } from 'astro:content';
+import sito from '../data/sito.json';
+
+const pagina = await getEntry('pagine', 'artista');
+const { Content } = pagina ? await render(pagina) : { Content: null };
+---
+<Base titolo="Artista" attiva="artista">
+  <article class="testo-pagina">
+    <h1>{sito.nome}</h1>
+    {Content && <Content />}
+    <blockquote class="citazione"><p>{sito.visione}</p></blockquote>
+  </article>
+</Base>

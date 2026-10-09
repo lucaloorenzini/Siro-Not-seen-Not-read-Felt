@@ -1,0 +1,70 @@
+---
+import Base from '../../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import { SERIE } from '../../content.config';
+import { opereOrdinate, misure, tecnica, titoloEsteso, type Opera } from '../../lib/opere';
+import { url } from '../../lib/url';
+
+export async function getStaticPaths() {
+  const opere = await opereOrdinate();
+  return opere.map((opera, i) => ({
+    params: { id: opera.id },
+    props: {
+      opera,
+      precedente: opere[(i - 1 + opere.length) % opere.length],
+      successiva: opere[(i + 1) % opere.length],
+      tutte: opere,
+    },
+  }));
+}
+
+interface Props { opera: Opera; precedente: Opera; successiva: Opera; tutte: Opera[] }
+const { opera, precedente, successiva, tutte } = Astro.props;
+const { Content } = await render(opera);
+const t = tecnica(opera);
+const m = misure(opera);
+const descrizione = [opera.data.titolo, t, m, opera.data.data].filter(Boolean).join(', ') + '. Opera di Siro.';
+---
+<Base titolo={titoloEsteso(opera, tutte)} descrizione={descrizione} immagineSocial={opera.data.immagine} attiva="opere">
+  <article class="scheda">
+    <figure class="tela" style="margin:0">
+      <Image
+        src={opera.data.immagine}
+        alt={opera.data.alt}
+        widths={[640, 1000, 1600]}
+        sizes="(min-width: 1000px) 60vw, 100vw"
+        loading="eager"
+      />
+    </figure>
+
+    <div>
+      <h1>{opera.data.titolo}</h1>
+      <dl>
+        {t && <><dt>Tecnica</dt><dd>{t}</dd></>}
+        {m && <><dt>Misure</dt><dd>{m}</dd></>}
+        <dt>Data</dt><dd>{opera.data.data}</dd>
+        <dt>Serie</dt><dd><a href={url(`opere/?serie=${opera.data.serie}`)}>{SERIE[opera.data.serie]}</a></dd>
+      </dl>
+      <div class="testo"><Content /></div>
+    </div>
+  </article>
+
+  {opera.data.dettagli && (
+    <section class="dettagli" aria-label="Dettagli">
+      {opera.data.dettagli.map((d) => (
+        <Image src={d.immagine} alt={d.alt} widths={[400, 800]} sizes="(min-width: 700px) 30vw, 100vw" />
+      ))}
+    </section>
+  )}
+
+  <nav class="sfoglia" aria-label="Altre opere">
+    <a href={url(`opere/${precedente.id}/`)}>
+      <span>Opera precedente</span><strong>{titoloEsteso(precedente, tutte)}</strong>
+    </a>
+    <a class="successiva" href={url(`opere/${successiva.id}/`)}>
+      <span>Opera successiva</span><strong>{titoloEsteso(successiva, tutte)}</strong>
+    </a>
+  </nav>
+  <p style="margin-top:2rem"><a href={url('opere/')}>Tutte le opere</a></p>
+</Base>

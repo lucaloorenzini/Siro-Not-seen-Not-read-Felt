@@ -1,0 +1,107 @@
+---
+import '@fontsource/archivo/400.css';
+import '@fontsource/archivo/700.css';
+import '@fontsource/big-shoulders-stencil/900.css';
+import '../styles/global.css';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import sito from '../data/sito.json';
+import { url } from '../lib/url';
+import { getEntry } from 'astro:content';
+
+interface Props {
+  titolo?: string;
+  descrizione?: string;
+  immagineSocial?: ImageMetadata;
+  attiva?: 'home' | 'opere' | 'artista' | 'allestimenti' | 'contatti';
+}
+const { titolo, descrizione = sito.descrizione, immagineSocial, attiva } = Astro.props;
+
+const titoloPagina = titolo ? `${titolo} | ${sito.nome}` : `${sito.nome}, ${sito.titoloSerie}`;
+
+// Immagine di anteprima per WhatsApp, Instagram, Facebook
+const apertura = await getEntry('opere', sito.operaInApertura);
+const sorgenteSocial = immagineSocial ?? apertura?.data.immagine;
+const social = sorgenteSocial
+  ? await getImage({ src: sorgenteSocial, width: 1200, format: 'jpg', quality: 80 })
+  : null;
+const socialAssoluta = social ? new URL(social.src, Astro.site).href : null;
+
+const voci = [
+  { chiave: 'home', etichetta: 'Home', href: url() },
+  { chiave: 'opere', etichetta: 'Opere', href: url('opere/') },
+  { chiave: 'artista', etichetta: 'Artista', href: url('artista/') },
+  { chiave: 'allestimenti', etichetta: 'Allestimenti', href: url('allestimenti/') },
+  { chiave: 'contatti', etichetta: 'Contatti', href: url('contatti/') },
+];
+---
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titoloPagina}</title>
+    <meta name="description" content={descrizione} />
+    {!sito.indicizzabile && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+    <link rel="icon" href={url('favicon.svg')} type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:site_name" content={sito.nome} />
+    <meta property="og:title" content={titoloPagina} />
+    <meta property="og:description" content={descrizione} />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site).href} />
+    {socialAssoluta && <meta property="og:image" content={socialAssoluta} />}
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div class="pagina">
+      <header class="testata">
+        <a class="firma" href={url()} aria-label={`${sito.nome}, pagina iniziale`}>{sito.nome.toUpperCase()}</a>
+      </header>
+      <nav class="menu" aria-label="Menu principale">
+        <ul>
+          {voci.map((v) => (
+            <li>
+              <a
+                href={v.href}
+                class={attiva === v.chiave ? 'nastro' : undefined}
+                aria-current={attiva === v.chiave ? 'page' : undefined}
+              >{v.etichetta}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <main id="contenuto">
+        <slot />
+      </main>
+      <footer class="piede">
+        <p>© {new Date().getFullYear()} {sito.nome}.</p>
+        {sito.email && <p><a href={`mailto:${sito.email}`}>{sito.email}</a></p>}
+      </footer>
+    </div>
+    <script>
+      // SIRO come cursore: scende di pari passo con lo scorrimento della pagina.
+      const testata = document.querySelector<HTMLElement>('.testata');
+      const firma = document.querySelector<HTMLElement>('.testata .firma');
+      const desktop = matchMedia('(min-width: 1000px)');
+      let inAttesa = false;
+      function aggiorna() {
+        inAttesa = false;
+        if (!testata || !firma) return;
+        if (!desktop.matches) { firma.style.removeProperty('--y'); return; }
+        const max = document.documentElement.scrollHeight - innerHeight;
+        const avanzamento = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
+        const st = getComputedStyle(testata);
+        const corsa = testata.clientHeight - parseFloat(st.paddingTop) - parseFloat(st.paddingBottom) - firma.offsetHeight;
+        firma.style.setProperty('--y', `${(avanzamento * Math.max(0, corsa)).toFixed(1)}px`);
+      }
+      const chiedi = () => { if (!inAttesa) { inAttesa = true; requestAnimationFrame(aggiorna); } };
+      addEventListener('scroll', chiedi, { passive: true });
+      addEventListener('resize', chiedi);
+      desktop.addEventListener('change', chiedi);
+      addEventListener('load', aggiorna);
+      aggiorna();
+    </script>
+  </body>
+</html>

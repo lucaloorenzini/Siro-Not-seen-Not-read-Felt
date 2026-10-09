@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import sito from '../data/sito.json';
+---
+<Base titolo="Contatti" attiva="contatti">
+  <article class="testo-pagina">
+    <h1>Contatti</h1>
+    <p>Per informazioni sulle opere, mostre e collaborazioni:</p>
+    {sito.email
+      ? <p><a href={`mailto:${sito.email}`}>{sito.email}</a></p>
+      : <p>L'indirizzo email sarà disponibile a breve.</p>}
+    {sito.instagram && <p><a href={`https://www.instagram.com/${sito.instagram.replace(/^@/, '')}/`}>Instagram</a></p>}
+  </article>
+</Base>

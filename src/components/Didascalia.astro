@@ -1,0 +1,14 @@
+---
+// Didascalia "da parete": titolo, tecnica, misure, data.
+import { misure, tecnica, type Opera } from '../lib/opere';
+interface Props { opera: Opera; tag?: 'figcaption' | 'div' }
+const { opera, tag: Tag = 'div' } = Astro.props;
+const t = tecnica(opera);
+const m = misure(opera);
+---
+<Tag class="didascalia">
+  <strong>{opera.data.titolo}</strong>
+  {t && <span>{t}</span>}
+  {m && <span>{m}</span>}
+  <span>{opera.data.data}</span>
+</Tag>

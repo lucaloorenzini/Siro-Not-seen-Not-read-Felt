@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+
+const sale = (await getCollection('allestimenti')).sort((a, b) => a.data.ordine - b.data.ordine);
+---
+<Base titolo="Allestimenti" attiva="allestimenti">
+  <header class="intestazione"><h1>Allestimenti</h1></header>
+  <div class="allestimenti">
+    {sale.map((s) => (
+      <figure style="margin:0">
+        <Image src={s.data.immagine} alt={s.data.alt} widths={[800, 1400]} sizes="(min-width: 1000px) 75vw, 100vw" />
+      </figure>
+    ))}
+  </div>
+</Base>

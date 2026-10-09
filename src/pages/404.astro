@@ -1,0 +1,10 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../lib/url';
+---
+<Base titolo="Pagina non trovata">
+  <article class="testo-pagina">
+    <h1>Questa pagina non esiste</h1>
+    <p>L'indirizzo potrebbe essere cambiato. Da qui puoi <a href={url('opere/')}>vedere tutte le opere</a> o <a href={url()}>tornare all'inizio</a>.</p>
+  </article>
+</Base>
