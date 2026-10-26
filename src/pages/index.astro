@@ -14,11 +14,12 @@ const sale = (await getCollection('allestimenti')).sort((a, b) => a.data.ordine 
 const primaSala = sale[0];
 const a = sito.artista;
 
-const capitoli = await Promise.all(
+const tuttiCapitoli = await Promise.all(
   (await getCollection('capitoli'))
     .sort((x, y) => x.data.ordine - y.data.ordine)
     .map(async (c) => ({
       id: c.id,
+      progetto: c.data.progetto,
       titolo: c.data.titolo,
       opere: (await getEntries(c.data.opere)).filter((o) => o && o.data.pubblicata),
       Content: (await render(c)).Content,
@@ -50,28 +51,32 @@ const capitoli = await Promise.all(
     <Didascalia opera={apertura} tag="figcaption" />
   </figure>
 
-  <section class="sezione progetto" aria-labelledby="titolo-progetto">
-    <h2 id="titolo-progetto" class="sezione-titolo">Il progetto:<br />{sito.titoloProgetto}</h2>
-    <p class="lead">{sito.introduzione}</p>
-  </section>
+  {sito.progetti.map((progetto) => (
+    <>
+      <section class="sezione progetto" aria-labelledby={`progetto-${progetto.id}`}>
+        <h2 id={`progetto-${progetto.id}`} class="sezione-titolo">Il progetto:<br />{progetto.titolo}</h2>
+        {progetto.introduzione && <p class="lead">{progetto.introduzione}</p>}
+      </section>
 
-  {capitoli.map(({ id, titolo, opere: abbinate, Content }) => (
-    <section class:list={['capitolo', { 'senza-opere': !abbinate.length }]} aria-labelledby={`cap-${id}`}>
-      <h3 id={`cap-${id}`}>{titolo}</h3>
-      <div class="capitolo-testo"><Content /></div>
-      {abbinate.length > 0 && (
-        <div class:list={['capitolo-opere', { coppia: abbinate.length > 1 }]}><div class="elenco">
-          {abbinate.map((o) => (
-            <figure>
-              <a href={url(`opere/${o.id}/`)}>
-                <Image src={o.data.immagine} alt={o.data.alt} widths={[480, 900]} sizes="(min-width: 760px) 40vw, 100vw" />
-              </a>
-              <Didascalia opera={o} tag="figcaption" />
-            </figure>
-          ))}
-        </div></div>
-      )}
-    </section>
+      {tuttiCapitoli.filter((c) => c.progetto === progetto.id).map(({ id, titolo, opere: abbinate, Content }) => (
+        <section class:list={['capitolo', { 'senza-opere': !abbinate.length }]} aria-labelledby={`cap-${id}`}>
+          <h3 id={`cap-${id}`}>{titolo}</h3>
+          <div class="capitolo-testo"><Content /></div>
+          {abbinate.length > 0 && (
+            <div class:list={['capitolo-opere', { coppia: abbinate.length > 1 }]}><div class="elenco">
+              {abbinate.map((o) => (
+                <figure>
+                  <a href={url(`opere/${o.id}/`)}>
+                    <Image src={o.data.immagine} alt={o.data.alt} widths={[480, 900]} sizes="(min-width: 760px) 40vw, 100vw" />
+                  </a>
+                  <Didascalia opera={o} tag="figcaption" />
+                </figure>
+              ))}
+            </div></div>
+          )}
+        </section>
+      ))}
+    </>
   ))}
 
   <section class="chiusura" aria-label="Opere e allestimenti">
