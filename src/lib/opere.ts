@@ -9,7 +9,8 @@ export async function opereOrdinate(): Promise<Opera[]> {
 
 /** "100 × 140 cm" (altezza × base), oppure null se mancano le misure. */
 export function misure(o: Opera): string | null {
-  const { altezza, base } = o.data;
+  const { altezza, base, misureTesto } = o.data;
+  if (misureTesto) return misureTesto;
   return altezza && base ? `${altezza} × ${base} cm` : null;
 }
 
