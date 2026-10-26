@@ -12,7 +12,8 @@ Ogni modifica salvata sul ramo `main` ripubblica il sito da sola in 1-2 minuti.
 | Le foto di allestimento | `src/content/allestimenti/` e `src/assets/allestimenti/` |
 | Biografia | `src/content/pagine/artista.md` |
 | Nome, presentazione e dati dell’artista (nome completo, data di nascita, luogo), titolo del progetto, email, Instagram, opera in apertura | `src/data/sito.json` |
-| Capitoli del testo in Home, con le opere abbinate | `src/content/capitoli/*.md` |
+| Capitoli del testo in Home, con le opere abbinate (campo `progetto`) | `src/content/capitoli/*.md` |
+| Progetti mostrati in Home (titolo e introduzione) | `src/data/sito.json`, voce `progetti` |
 | Colori e caratteri | `src/styles/global.css` |
 | Pubblicazione automatica | `.github/workflows/pubblica.yml` |
 
@@ -25,7 +26,7 @@ Ogni modifica salvata sul ramo `main` ripubblica il sito da sola in 1-2 minuti.
 ```yaml
 ---
 titolo: "Titolo dell'opera"
-serie: money            # felt, money, ljubav, parole-e-potere, griglie-di-lettere, altre-opere
+serie: money            # felt, dont-judge, money, ljubav, parole-e-potere, griglie-di-lettere, wool, art, altre-opere
 ordine: 26              # posizione nella galleria
 immagine: ../../assets/opere/nome-opera.jpg
 alt: "Descrizione per chi non vede l'immagine: colori e parole dipinte."
@@ -33,6 +34,7 @@ tecnica: "Acrilico"
 supporto: "tela"        # facoltativo: viene mostrato come "Acrilico su tela"
 altezza: 70             # cm
 base: 50                # cm
+misureTesto: "Dittico, due tele da 40 × 60 cm"   # facoltativo: per dittici e polittici
 data: "Ottobre 2026"
 pubblicata: true        # false = la scheda resta nell'archivio ma non va online
 note: "Promemoria interni, non compaiono sul sito"
@@ -93,3 +95,11 @@ Nota: se il repository si chiama `<tuo-utente>.github.io`, in `pubblica.yml` met
 - **Money 60x50**: la foto ritagliata risulta orizzontale, controllare le misure.
 - **Biografia, email, Instagram, testi delle opere**: da fornire.
 - **Foto**: le attuali vengono da WhatsApp (circa 1.000-1.600 pixel). Gli originali ad alta risoluzione migliorerebbero molto le schede.
+
+### Aggiornamento di ottobre 2026 (nuove opere)
+
+- **Due opere nascoste** (`pubblicata: false`): `senza-titolo-art` e `senza-titolo-life`. Le foto sono arrivate senza didascalia: servono titolo, tecnica, misure e data, poi basta mettere `pubblicata: true`.
+- **Art Alert Art**: didascalia originale in inglese con refuso ("Oil on acrilic"); sul sito è "Olio su acrilico".
+- **Twist**: didascalia "40 × 60" ma la tela è orizzontale.
+- **Never judge** e **You choose**: l'ingombro usato per la scala in galleria è stimato (dittico impilato 80 × 60 cm, polittico in due file da sei 80 × 180 cm). Confermare come vanno allestiti.
+- **Nome del secondo progetto**: in Home è "Don’t Judge, Never Judge.". Da confermare.
